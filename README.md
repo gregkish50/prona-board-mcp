@@ -95,18 +95,20 @@ http_headers = { "Authorization" = "Bearer <ТОКЕН>" }
 
 ## Инструменты
 
-Шесть инструментов по назначению, внутри каждого свой набор операций. Координаты агент не считает: он говорит, что и относительно чего поставить, а раскладку, зазоры и обход связей считает сервер.
+Шесть инструментов по назначению. Действие внутри инструмента выбирается полем `op`. Координаты агент не считает: он говорит, что и относительно чего поставить, а раскладку, зазоры и обход связей считает сервер.
 
-| Инструмент | Назначение |
-|---|---|
-| `board_read` | Читать доску: обзор, область, элементы, связи, документ, выделение по ссылке, изменения с прошлого чтения |
-| `board_create` | Создавать: секции (сервер сам измерит, разложит и обведёт областью), элементы и связи пачкой, шаблоны с зонами (канбан, 2×2, карта историй), план работы по треку методики |
-| `board_arrange` | Раскладывать и прибирать: переразложить область, выровнять, перенести группу, обжать область по содержимому |
-| `board_edit` | Править: текст, цвет, статусы, тело документа. Копировать и удалять |
-| `board_safety` | Сохранить версию перед крупной правкой, поставить замок на область, пока агент в ней пишет |
-| `board_space` | Доски пространства: список, создание, удаление, статус связи |
+| Инструмент | Назначение | Операции (`op`) |
+|---|---|---|
+| `board_read` | Читать доску сценой, а не плоским списком фигур. Показывает, что изменилось с прошлого чтения и что правил человек | `overview`, `frame`, `elements`, `full`, `index`, `spatial`, `connectors`, `layout_map`, `changes`, `diff`, `document`, `selection`, `image`, `frame_shot`, `mockup_shot`, `storyboard`, `animation` |
+| `board_create` | Создавать: секцию (сервер сам измерит, разложит и обведёт областью), элементы и связи пачкой, шаблоны с зонами (канбан, 2×2, карта историй), план по треку методики, раскадровку показа, видеоанимацию | `section`, `elements`, `template`, `place`, `frame`, `measure`, `method` (он же `research`), `storyboard`, `animation` |
+| `board_arrange` | Раскладывать и прибирать то, что уже на доске | `arrange`, `align`, `move_group`, `move`, `fit`, `resize`, `membership` |
+| `board_edit` | Править существующее: текст, цвет, статусы, тело документа, слой, таблицы, макеты. Копировать и удалять | `update`, `copy`, `delete`, `track_choice` |
+| `board_safety` | Точки возврата и замки: версия перед крупной правкой, замок на область на время серии правок | `save_version`, `list_versions`, `lock`, `unlock`, `locks` |
+| `board_space` | Доски пространства и проверка связи. Одна задача — одна доска | `status`, `boards`, `new_board`, `drop_board` |
 
-Каждая запись сверяется с ревизией доски. Если человек успел что-то поменять, агент получит отказ и не перезапишет чужую работу.
+Кроме инструментов, сервер отдаёт MCP-промпт `board_task_workflow`: правила ведения доски задачи.
+
+Каждая запись сверяется с ревизией доски. Если человек успел что-то поменять, агент получит отказ `stale_revision` и не перезапишет чужую работу. В каждом ответе записи видно, применилась ли правка (`applied`).
 
 ## Данные и хранение
 
@@ -129,6 +131,7 @@ Miro — холст, который вы заполняете сами. Deep Res
 **PRONA Board** is a free canvas where your AI agent runs a hard task stage by stage. Connect Claude Code, Codex or Cursor over MCP. The agent follows a method track (Research, Delivery, Documentation), and its decisions and questions for you are right there on the board. It's free and needs no sign-up.
 
 - Remote MCP server (Streamable HTTP): `https://board-mcp.prona.space/mcp`, auth `Authorization: Bearer <token>`
+- Tools: `board_read`, `board_create`, `board_arrange`, `board_edit`, `board_safety`, `board_space` (action picked by the `op` field) + prompt `board_task_workflow`
 - Get a token: [prona.space/board](https://prona.space/board) → **Connect an agent**
 - Docs: [prona.space/board/docs](https://prona.space/board/docs)
 
